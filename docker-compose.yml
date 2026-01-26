@@ -1,0 +1,25 @@
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.combined
+    ports:
+      - "8080:80"
+    volumes:
+      # 挂载 zcgames 项目目录（自动更新）
+      - ../zcgames:/usr/share/nginx/html/zcgames:ro
+      # 挂载 edutool 项目目录（自动更新）
+      - .:/usr/share/nginx/html/edutool:ro
+      # 挂载 webtool 项目目录（自动更新）
+      - ../webtool:/usr/share/nginx/html/webtool:ro
+      # 挂载日志目录供 Logstash 采集
+      - ./logs:/var/log/nginx
+    restart: unless-stopped
+    container_name: combined-nginx
+    networks:
+      - elk
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
