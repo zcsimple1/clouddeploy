@@ -5,14 +5,16 @@ ELK 是 Elasticsearch、Logstash、Kibana 的缩写，是一个强大的日志�
 ## 架构说明
 
 ```
-应用容器 (Nginx)
-    ↓ 日志
+应用容器 (Nginx) / MQTT 设备 (OneNET)
+    ↓ 日志 / 消息
 Logstash (日志采集和处理)
     ↓
 Elasticsearch (日志存储和索引)
     ↓
 Kibana (日志可视化和查询)
 ```
+
+**注意**: 本项目已集成 OneNET MQTT 支持，详见 [README.MQTT.md](README.MQTT.md)
 
 ## 资源要求
 

@@ -16,7 +16,9 @@ services:
     restart: unless-stopped
 
   logstash:
-    image: docker.elastic.co/logstash/logstash:8.12.0
+    build:
+      context: .
+      dockerfile: Dockerfile.logstash
     container_name: logstash
     ports:
       - "5044:5044"
