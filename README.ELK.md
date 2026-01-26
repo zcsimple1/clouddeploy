@@ -16,10 +16,11 @@ Kibana (日志可视化和查询)
 
 ## 资源要求
 
-- **Elasticsearch**: 最少 1GB 内存（配置为 512MB）
-- **Logstash**: 最少 512MB 内存
-- **Kibana**: 最少 512MB 内存
-- **总计**: 建议至少 4GB 可用内存
+- **Elasticsearch**: 推荐 1GB 内存（已配置 1GB）
+- **Logstash**: 约 512MB 内存
+- **Kibana**: 约 512MB 内存
+- **总计**: 建议 3-4GB 可用内存
+- **磁盘**: 至少 20GB（SSD 推荐）
 
 ## 部署前准备
 
