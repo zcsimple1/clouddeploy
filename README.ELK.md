@@ -33,7 +33,6 @@ sudo mkdir -p /root/data/elk/elasticsearch
 sudo mkdir -p /root/data/elk/logstash/pipeline
 sudo mkdir -p /root/data/elk/logstash/config
 sudo mkdir -p /root/data/elk/kibana/data
-sudo mkdir -p /root/data/elk/kibana/config
 
 # 复制 Logstash 配置文件到外部目录
 cp -r logstash/pipeline/* /root/data/elk/logstash/pipeline/
@@ -42,8 +41,6 @@ cp -r logstash/config/* /root/data/elk/logstash/config/
 # 设置 Elasticsearch 目录权限（ES 容器使用 UID 1000）
 sudo chown -R 1000:1000 /root/data/elk/elasticsearch
 sudo chown -R 1000:1000 /root/data/elk/kibana/data
-
-# 设置 Logstash 目录权限（Logstash 容器使用 UID 1000）
 sudo chown -R 1000:1000 /root/data/elk/logstash
 ```
 
@@ -150,9 +147,8 @@ ELK 所有数据和配置都存储在 `/root/data/elk/` 目录下：
 ├── logstash/         # Logstash 配置文件
 │   ├── pipeline/     # Logstash 管道配置
 │   └── config/       # Logstash 系统配置
-└── kibana/           # Kibana 数据和配置
-    ├── data/         # Kibana 数据（仪表板、索引模式等）
-    └── config/       # Kibana 配置文件
+└── kibana/
+    └── data/         # Kibana 数据（仪表板、索引模式等）
 ```
 
 **重要**: 升级或重新部署 ELK 时，只需停止容器、拉取新镜像、重新启动，**数据不会丢失**，因为所有数据都已外挂到宿主机。
