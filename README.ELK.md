@@ -21,6 +21,32 @@ Kibana (日志可视化和查询)
 - **Kibana**: 最少 512MB 内存
 - **总计**: 建议至少 4GB 可用内存
 
+## 部署前准备
+
+### 1. 创建数据目录
+
+首次部署前，需要在宿主机上创建数据目录并设置正确权限：
+
+```bash
+# 创建所有必要的目录
+sudo mkdir -p /root/data/elk/elasticsearch
+sudo mkdir -p /root/data/elk/logstash/pipeline
+sudo mkdir -p /root/data/elk/logstash/config
+sudo mkdir -p /root/data/elk/kibana/data
+sudo mkdir -p /root/data/elk/kibana/config
+
+# 复制 Logstash 配置文件到外部目录
+cp -r logstash/pipeline/* /root/data/elk/logstash/pipeline/
+cp -r logstash/config/* /root/data/elk/logstash/config/
+
+# 设置 Elasticsearch 目录权限（ES 容器使用 UID 1000）
+sudo chown -R 1000:1000 /root/data/elk/elasticsearch
+sudo chown -R 1000:1000 /root/data/elk/kibana/data
+
+# 设置 Logstash 目录权限（Logstash 容器使用 UID 1000）
+sudo chown -R 1000:1000 /root/data/elk/logstash
+```
+
 ## 部署方式
 
 ### 方式 1: 仅部署 ELK
@@ -69,6 +95,27 @@ Kibana (日志可视化和查询)
 2. 点击 "Create dashboard"
 3. 添加各种可视化组件
 
+## 升级 ELK
+
+升级 ELK 版本时，由于所有数据都已外挂，不会丢失数据：
+
+```bash
+# 1. 停止所有容器
+docker-compose -f docker-compose.elk.yml down
+
+# 2. 备份当前数据（可选但推荐）
+sudo tar -czf /root/elk-backup-$(date +%Y%m%d).tar.gz /root/data/elk/
+
+# 3. 拉取新镜像
+docker-compose -f docker-compose.elk.yml pull
+
+# 4. 启动新版本
+docker-compose -f docker-compose.elk.yml up -d
+
+# 5. 查看启动状态
+docker-compose -f docker-compose.elk.yml ps
+```
+
 ## 常用命令
 
 ```bash
@@ -95,15 +142,20 @@ docker-compose -f docker-compose.elk.yml restart
 
 ### 数据存储路径
 
-ELK 数据存储在 `/root/data/elk/` 目录下：
+ELK 所有数据和配置都存储在 `/root/data/elk/` 目录下：
 
 ```
 /root/data/elk/
-├── elasticsearch/    # Elasticsearch 数据
-└── logstash/         # Logstash 配置文件
-    ├── pipeline/     # Logstash 管道配置
-    └── config/       # Logstash 系统配置
+├── elasticsearch/    # Elasticsearch 数据（索引、节点信息）
+├── logstash/         # Logstash 配置文件
+│   ├── pipeline/     # Logstash 管道配置
+│   └── config/       # Logstash 系统配置
+└── kibana/           # Kibana 数据和配置
+    ├── data/         # Kibana 数据（仪表板、索引模式等）
+    └── config/       # Kibana 配置文件
 ```
+
+**重要**: 升级或重新部署 ELK 时，只需停止容器、拉取新镜像、重新启动，**数据不会丢失**，因为所有数据都已外挂到宿主机。
 
 如需修改存储路径，请编辑 `docker-compose.elk.yml` 文件中的 volumes 配置。
 
