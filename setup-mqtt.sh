@@ -11,11 +11,11 @@ echo "================================"
 echo ""
 
 # MQTT 配置
-MQTT_HOST="183.230.40.96"
+MQTT_HOST="mqtts.heclouds.com"
 MQTT_PORT="1883"
 MQTT_USER="v6IkuqD6vh"
-# 产品级 Token，有效期为 30 天 (2026-01-27 生成)
-MQTT_PASS="version=2018-10-31&res=products%2Fv6IkuqD6vh&et=1772103462&method=sha1&sign=lBp%2FFuz1mI%2FUXyhjTfHHp%2Fixvow%3D"
+# 产品级 Token (使用用户提供的有效 Token)
+MQTT_PASS="version=2018-10-31&res=products%2Fv6IkuqD6vh&et=1855626888&method=sha1&sign=xhR6Azo%2BPoFz7Tw0iFA1uMKNXNs%3D"
 # 订阅所有设备数据
 MQTT_TOPICS="\$sys/v6IkuqD6vh/#"
 LOGSTASH_URL="http://localhost:5000"
@@ -30,16 +30,17 @@ echo "2. 创建 MQTT 订阅脚本..."
 cat > "$INSTALL_DIR/mqtt-to-logstash.sh" << 'SCRIPT'
 #!/bin/bash
 
-MQTT_HOST="183.230.40.96"
+MQTT_HOST="mqtts.heclouds.com"
 MQTT_PORT="1883"
 MQTT_USER="v6IkuqD6vh"
-MQTT_PASS="version=2018-10-31&res=products%2Fv6IkuqD6vh&et=1772103462&method=sha1&sign=lBp%2FFuz1mI%2FUXyhjTfHHp%2Fixvow%3D"
+# 产品级 Token (使用用户提供的有效 Token)
+MQTT_PASS="version=2018-10-31&res=products%2Fv6IkuqD6vh&et=1855626888&method=sha1&sign=xhR6Azo%2BPoFz7Tw0iFA1uMKNXNs%3D"
 # 订阅所有设备数据
 MQTT_TOPICS="\$sys/v6IkuqD6vh/#"
 LOGSTASH_URL="http://localhost:5000"
 
-# 生成随机 Client ID (产品级 token 应该使用不同的 Client ID)
-CLIENT_ID="elk-bridge-$(date +%s)-$$"
+# 生成随机 Client ID
+CLIENT_ID="bridge-$(date +%s)-$$"
 
 echo "=========================================="
 echo "MQTT to Logstash 桥接服务启动中..."
