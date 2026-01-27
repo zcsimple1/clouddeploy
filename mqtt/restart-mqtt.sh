@@ -12,7 +12,7 @@ sudo systemctl stop elk-mqtt
 
 # 重新部署
 echo "2. 重新部署..."
-cd /root/workspace/clouddeploy && bash setup-mqtt.sh
+cd /root/workspace/clouddeploy/mqtt && bash setup-mqtt.sh
 
 # 显示服务状态
 echo ""

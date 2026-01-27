@@ -33,7 +33,7 @@ MQTT_PASS="version=2018-10-31&res=products%2Fv6IkuqD6vh&et=1855626888&method=sha
 # 订阅所有设备数据
 MQTT_TOPICS="\$sys/v6IkuqD6vh/#"
 LOGSTASH_URL="http://localhost:5000"
-INSTALL_DIR="/root/workspace/clouddeploy/elk-mqtt"
+INSTALL_DIR="/root/workspace/clouddeploy/mqtt/elk-mqtt"
 
 # 1. 创建目录
 echo "1. 创建安装目录..."

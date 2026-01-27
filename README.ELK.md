@@ -14,7 +14,7 @@ Elasticsearch (日志存储和索引)
 Kibana (日志可视化和查询)
 ```
 
-**注意**: 本项目已集成 OneNET MQTT 支持，详见 [README.MQTT.md](README.MQTT.md)
+**注意**: 本项目已集成 OneNET MQTT 支持，详见 [mqtt/README.MQTT.md](mqtt/README.MQTT.md)
 
 ## 资源要求
 
