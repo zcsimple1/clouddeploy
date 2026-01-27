@@ -14,10 +14,10 @@ echo ""
 MQTT_HOST="183.230.40.96"
 MQTT_PORT="1883"
 MQTT_USER="v6IkuqD6vh"
-# 设备级 Token（MO1设备），有效期为 30 天
-MQTT_PASS="version=2018-10-31&res=products%2Fv6IkuqD6vh%2Fdevices%2FMO1&et=1772100668&method=sha1&sign=gNj1ZeVxTnO8Eo2DbzMwK8Dv6Jw%3D"
-# 订阅设备数据上报的系统主题
-MQTT_TOPICS="\$sys/v6IkuqD6vh/MO1/#"
+# 产品级 Token，有效期为 30 天
+MQTT_PASS="version=2018-10-31&res=products%2Fv6IkuqD6vh&et=1772100545&method=sha1&sign=STTG3qXBi%2FLUehy%2B37OLkjZ50yQ%3D"
+# 订阅所有设备数据
+MQTT_TOPICS="\$sys/v6IkuqD6vh/#"
 LOGSTASH_URL="http://localhost:5000"
 INSTALL_DIR="/root/workspace/clouddeploy/elk-mqtt"
 
@@ -33,9 +33,9 @@ cat > "$INSTALL_DIR/mqtt-to-logstash.sh" << 'SCRIPT'
 MQTT_HOST="183.230.40.96"
 MQTT_PORT="1883"
 MQTT_USER="v6IkuqD6vh"
-MQTT_PASS="version=2018-10-31&res=products%2Fv6IkuqD6vh%2Fdevices%2FMO1&et=1772100668&method=sha1&sign=gNj1ZeVxTnO8Eo2DbzMwK8Dv6Jw%3D"
-# 订阅设备数据上报的系统主题
-MQTT_TOPICS="\$sys/v6IkuqD6vh/MO1/#"
+MQTT_PASS="version=2018-10-31&res=products%2Fv6IkuqD6vh&et=1772100545&method=sha1&sign=STTG3qXBi%2FLUehy%2B37OLkjZ50yQ%3D"
+# 订阅所有设备数据
+MQTT_TOPICS="\$sys/v6IkuqD6vh/#"
 LOGSTASH_URL="http://localhost:5000"
 
 echo "=========================================="
@@ -50,7 +50,7 @@ echo ""
 
 mosquitto_sub -h "$MQTT_HOST" -p "$MQTT_PORT" \
   -u "$MQTT_USER" -P "$MQTT_PASS" \
-  -t "$MQTT_TOPICS" -v 2>&1 | \
+  -t "$MQTT_TOPICS" -v -V 311 2>&1 | \
   while IFS= read -r line; do
     TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
     echo "[$TIMESTAMP] Received: $line"
