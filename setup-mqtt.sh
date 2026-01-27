@@ -14,9 +14,9 @@ echo ""
 MQTT_HOST="mqtts.heclouds.com"
 MQTT_PORT="1883"
 MQTT_USER="v6IkuqD6vh"
-# 注意：这个 Token 可能已过期，需要在 OneNET 控制台重新生成
-MQTT_PASS="version=2018-10-31&res=products%2Fv6IkuqD6vh&et=1855626888&method=sha1&sign=xhR6Azo%2BPoFz7Tw0iFA1uMKNXNs%3D"
-MQTT_TOPICS="\$sys/v6IkuqD6vh/MO/#"
+# 设备级 Token，有效期为 30 天
+MQTT_PASS="version=2018-10-31&res=products%2Fv6IkuqD6vh%2Fdevices%2FMO&et=1772098636&method=sha1&sign=vzb4PV%2FK%2FvPLSdBd%2FVOVRHrSX44%3D"
+MQTT_TOPICS="test"
 LOGSTASH_URL="http://localhost:5000"
 INSTALL_DIR="/root/elk-mqtt"
 
@@ -32,8 +32,8 @@ cat > "$INSTALL_DIR/mqtt-to-logstash.sh" << 'SCRIPT'
 MQTT_HOST="mqtts.heclouds.com"
 MQTT_PORT="1883"
 MQTT_USER="v6IkuqD6vh"
-MQTT_PASS="version=2018-10-31&res=products%2Fv6IkuqD6vh&et=1855626888&method=sha1&sign=xhR6Azo%2BPoFz7Tw0iFA1uMKNXNs%3D"
-MQTT_TOPICS="\$sys/v6IkuqD6vh/MO/#"
+MQTT_PASS="version=2018-10-31&res=products%2Fv6IkuqD6vh%2Fdevices%2FMO&et=1772098636&method=sha1&sign=vzb4PV%2FK%2FvPLSdBd%2FVOVRHrSX44%3D"
+MQTT_TOPICS="test"
 LOGSTASH_URL="http://localhost:5000"
 
 echo "=========================================="
@@ -48,7 +48,7 @@ echo ""
 
 mosquitto_sub -h "$MQTT_HOST" -p "$MQTT_PORT" \
   -u "$MQTT_USER" -P "$MQTT_PASS" \
-  -t "$MQTT_TOPICS" -i "logstash-bridge" -v 2>&1 | \
+  -t "$MQTT_TOPICS" -i "elk_bridge_v1" -v -V 311 2>&1 | \
   while IFS= read -r line; do
     TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
     echo "[$TIMESTAMP] Received: $line"
