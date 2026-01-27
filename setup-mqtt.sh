@@ -12,24 +12,23 @@ echo ""
 
 # MQTT 配置
 # ============================================================================
-# 配置组1: 产品级 Token (主用) - 支持随机Client ID,可订阅所有设备消息
+# 配置组1: 用户提供的Token (主用)
+# 使用设备MO作为Client ID连接并订阅所有设备消息
+# 注意: 确保设备MO未被其他客户端(如MQTTX)占用
 # ============================================================================
 MQTT_HOST="mqtts.heclouds.com"
 MQTT_PORT="1883"
 MQTT_USER="v6IkuqD6vh"
-# 产品级 Token (使用用户提供的有效 Token)
 MQTT_PASS="version=2018-10-31&res=products%2Fv6IkuqD6vh&et=1855626888&method=sha1&sign=xhR6Azo%2BPoFz7Tw0iFA1uMKNXNs%3D"
 
 # ============================================================================
-# 配置组2: 设备级 Token (备用) - 需要使用设备名作为Client ID
-# 如果配置组1不可用,可以切换到此配置,但需要确保设备MO未被其他客户端占用
+# 配置组2: 设备级Token (备用)
+# 如果MO不可用,可以切换到此配置使用MO1作为Client ID
 # ============================================================================
 # MQTT_HOST="mqtts.heclouds.com"
 # MQTT_PORT="1883"
 # MQTT_USER="v6IkuqD6vh"
 # MQTT_PASS="version=2018-10-31&res=products%2Fv6IkuqD6vh%2Fdevices%2FMO&et=1772098636&method=sha1&sign=vzb4PV%2FK%2FvPLSdBd%2FVOVRHrSX44%3D"
-# # 使用设备MO作为Client ID (注释掉下面的CLIENT_ID生成代码)
-# CLIENT_ID="MO"
 
 # 订阅所有设备数据
 MQTT_TOPICS="\$sys/v6IkuqD6vh/#"
@@ -48,14 +47,13 @@ cat > "$INSTALL_DIR/mqtt-to-logstash.sh" << 'SCRIPT'
 MQTT_HOST="mqtts.heclouds.com"
 MQTT_PORT="1883"
 MQTT_USER="v6IkuqD6vh"
-# 产品级 Token (使用用户提供的有效 Token)
 MQTT_PASS="version=2018-10-31&res=products%2Fv6IkuqD6vh&et=1855626888&method=sha1&sign=xhR6Azo%2BPoFz7Tw0iFA1uMKNXNs%3D"
 # 订阅所有设备数据
 MQTT_TOPICS="\$sys/v6IkuqD6vh/#"
 LOGSTASH_URL="http://localhost:5000"
 
-# 生成随机 Client ID
-CLIENT_ID="bridge-$(date +%s)-$$"
+# 使用设备MO作为Client ID (必须使用已注册的设备名)
+CLIENT_ID="MO"
 
 echo "=========================================="
 echo "MQTT to Logstash 桥接服务启动中..."
