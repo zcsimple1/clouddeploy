@@ -22,6 +22,6 @@ MO_CONFIG=(
 # ============================================================================
 MO1_CONFIG=(
     "$PRODUCT_ID"                           # 用户名
-    "version=2018-10-31&res=products%2Fv6IkuqD6vh%2Fdevices%2FMO&et=1772098636&method=sha1&sign=vzb4PV%2FK%2FvPLSdBd%2FVOVRHrSX44%3D"  # 密码
+    "version=2018-10-31&res=products%2Fv6IkuqD6vh%2Fdevices%2FMO1&et=1772105871&method=sha1&sign=ZZoc17%2BbrxprIZ7prgo82Y%2FTDG4%3D"  # 密码
     "MO1"                                  # Client ID
 )
