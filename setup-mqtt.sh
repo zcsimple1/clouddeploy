@@ -73,7 +73,7 @@ chmod +x "$INSTALL_DIR/mqtt-to-logstash.sh"
 
 # 3. 创建 systemd 服务
 echo "3. 创建 systemd 服务..."
-cat > /tmp/elk-mqtt.service << 'SERVICE'
+cat > /tmp/elk-mqtt.service << SERVICE
 [Unit]
 Description=ELK MQTT to Logstash Bridge
 After=network.target docker.service
