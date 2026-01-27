@@ -16,7 +16,7 @@ MQTT_PORT="1883"
 MQTT_USER="v6IkuqD6vh"
 # 注意：这个 Token 可能已过期，需要在 OneNET 控制台重新生成
 MQTT_PASS="version=2018-10-31&res=products%2Fv6IkuqD6vh&et=1855626888&method=sha1&sign=xhR6Azo%2BPoFz7Tw0iFA1uMKNXNs%3D"
-MQTT_TOPICS="#"
+MQTT_TOPICS="\$sys/v6IkuqD6vh/MO/#"
 LOGSTASH_URL="http://localhost:5000"
 INSTALL_DIR="/root/elk-mqtt"
 
@@ -33,6 +33,7 @@ MQTT_HOST="mqtts.heclouds.com"
 MQTT_PORT="1883"
 MQTT_USER="v6IkuqD6vh"
 MQTT_PASS="version=2018-10-31&res=products%2Fv6IkuqD6vh&et=1855626888&method=sha1&sign=xhR6Azo%2BPoFz7Tw0iFA1uMKNXNs%3D"
+MQTT_TOPICS="\$sys/v6IkuqD6vh/MO/#"
 LOGSTASH_URL="http://localhost:5000"
 
 echo "=========================================="
