@@ -50,7 +50,7 @@ echo ""
 
 mosquitto_sub -h "$MQTT_HOST" -p "$MQTT_PORT" \
   -u "$MQTT_USER" -P "$MQTT_PASS" \
-  -t "$MQTT_TOPICS" -v -V 311 2>&1 | \
+  -t "$MQTT_TOPICS" -v 2>&1 | \
   while IFS= read -r line; do
     TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
     echo "[$TIMESTAMP] Received: $line"
