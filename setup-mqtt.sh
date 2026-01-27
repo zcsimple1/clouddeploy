@@ -38,11 +38,15 @@ MQTT_PASS="version=2018-10-31&res=products%2Fv6IkuqD6vh&et=1772100545&method=sha
 MQTT_TOPICS="\$sys/v6IkuqD6vh/#"
 LOGSTASH_URL="http://localhost:5000"
 
+# 生成随机 Client ID (产品级 token 应该使用不同的 Client ID)
+CLIENT_ID="elk-bridge-$(date +%s)-$$"
+
 echo "=========================================="
 echo "MQTT to Logstash 桥接服务启动中..."
 echo "=========================================="
 echo "Broker: $MQTT_HOST:$MQTT_PORT"
 echo "User: $MQTT_USER"
+echo "Client ID: $CLIENT_ID"
 echo "Topics: $MQTT_TOPICS"
 echo "Logstash: $LOGSTASH_URL"
 echo "=========================================="
@@ -50,6 +54,7 @@ echo ""
 
 mosquitto_sub -h "$MQTT_HOST" -p "$MQTT_PORT" \
   -u "$MQTT_USER" -P "$MQTT_PASS" \
+  -i "$CLIENT_ID" \
   -t "$MQTT_TOPICS" -v -V 311 2>&1 | \
   while IFS= read -r line; do
     TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
