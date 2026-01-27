@@ -18,7 +18,7 @@ MQTT_USER="v6IkuqD6vh"
 MQTT_PASS="version=2018-10-31&res=products%2Fv6IkuqD6vh%2Fdevices%2FMO&et=1772098636&method=sha1&sign=vzb4PV%2FK%2FvPLSdBd%2FVOVRHrSX44%3D"
 MQTT_TOPICS="test"
 LOGSTASH_URL="http://localhost:5000"
-INSTALL_DIR="/root/elk-mqtt"
+INSTALL_DIR="/root/workspace/clouddeploy/elk-mqtt"
 
 # 1. 创建目录
 echo "1. 创建安装目录..."
