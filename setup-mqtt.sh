@@ -16,7 +16,8 @@ MQTT_PORT="1883"
 MQTT_USER="v6IkuqD6vh"
 # 设备级 Token（MO设备），有效期为 30 天
 MQTT_PASS="version=2018-10-31&res=products%2Fv6IkuqD6vh%2Fdevices%2FMO&et=1772098636&method=sha1&sign=vzb4PV%2FK%2FvPLSdBd%2FVOVRHrSX44%3D"
-MQTT_TOPICS="test"
+# 订阅设备数据上报的系统主题
+MQTT_TOPICS="\$sys/v6IkuqD6vh/MO/#"
 LOGSTASH_URL="http://localhost:5000"
 INSTALL_DIR="/root/workspace/clouddeploy/elk-mqtt"
 
@@ -33,7 +34,8 @@ MQTT_HOST="183.230.40.96"
 MQTT_PORT="1883"
 MQTT_USER="v6IkuqD6vh"
 MQTT_PASS="version=2018-10-31&res=products%2Fv6IkuqD6vh%2Fdevices%2FMO&et=1772098636&method=sha1&sign=vzb4PV%2FK%2FvPLSdBd%2FVOVRHrSX44%3D"
-MQTT_TOPICS="test"
+# 订阅设备数据上报的系统主题
+MQTT_TOPICS="\$sys/v6IkuqD6vh/MO/#"
 LOGSTASH_URL="http://localhost:5000"
 
 echo "=========================================="
