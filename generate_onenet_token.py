@@ -79,8 +79,8 @@ def generate_product_token(product_id, access_key, expire_hours=24):
 if __name__ == '__main__':
     # 配置信息
     PRODUCT_ID = 'v6IkuqD6vh'
-    DEVICE_ID = 'MO'
-    ACCESS_KEY = 'NHVWN09maHh3TTF6NFJ4TnRaeTBPeHpKaU8zQU9qaGQ='
+    DEVICE_ID = 'MO1'
+    ACCESS_KEY = 'THNRWXNxUWxjSWNUOXNoN0pNalBGR3pKVHd3TDBkbjQ='
 
     # 生成设备级 Token（推荐用于设备连接）
     print("=" * 60)
