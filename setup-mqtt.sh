@@ -51,21 +51,26 @@ mosquitto_sub -h "$MQTT_HOST" -p "$MQTT_PORT" \
   -t "$MQTT_TOPICS" -i "logstash-bridge" -v 2>&1 | \
   while IFS= read -r line; do
     TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
+    echo "[$TIMESTAMP] Received: $line"
 
     # 检查是否是 JSON 消息
     if echo "$line" | jq -e . > /dev/null 2>&1; then
-      echo "[$TIMESTAMP] JSON message received"
-      curl -X POST "$LOGSTASH_URL/" \
+      echo "[$TIMESTAMP] Sending JSON to Logstash..."
+      HTTP_CODE=$(curl -X POST "$LOGSTASH_URL/" \
         -H "Content-Type: application/json" \
         -d "$line" \
-        -s -o /dev/null -w "HTTP %{http_code}\n"
+        -s -o /dev/null -w "%{http_code}")
+      echo "[$TIMESTAMP] Logstash response: HTTP $HTTP_CODE"
     else
-      echo "[$TIMESTAMP] Converting to JSON and sending..."
-      echo "{\"message\": \"$line\", \"project\": \"onenet\", \"timestamp\": \"$(date -u '+%Y-%m-%dT%H:%M:%S.%3NZ')\"}" | \
+      echo "[$TIMESTAMP] Not JSON, converting..."
+      JSON_DATA="{\"message\": \"$line\", \"project\": \"onenet\", \"timestamp\": \"$(date -u '+%Y-%m-%dT%H:%M:%S.%3NZ')\"}"
+      echo "[$TIMESTAMP] Sending converted JSON: $JSON_DATA"
+      HTTP_CODE=$(echo "$JSON_DATA" | \
         curl -X POST "$LOGSTASH_URL/" \
           -H "Content-Type: application/json" \
           -d @- \
-          -s -o /dev/null -w "HTTP %{http_code}\n"
+          -s -o /dev/null -w "%{http_code}")
+      echo "[$TIMESTAMP] Logstash response: HTTP $HTTP_CODE"
     fi
   done
 SCRIPT
