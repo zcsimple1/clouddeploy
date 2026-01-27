@@ -2,21 +2,50 @@
 
 本目录包含 OneNET MQTT 设备接入相关的脚本和配置。
 
+## 目录结构
+
+```
+mqtt/
+├── 部署脚本
+│   ├── setup-env.sh          # 环境依赖安装脚本
+│   ├── setup-mqtt.sh         # MQTT 桥接服务安装脚本
+│   ├── restart-mqtt.sh       # 快速重启 MQTT 桥接服务
+│   └── mqtt-config.sh        # MQTT 配置信息
+├── 工具
+│   └── generate_onenet_token.py  # OneNET Token 生成工具
+├── 测试脚本
+│   ├── verify-mo.py          # 验证 MO 设备连接（本地快速测试）
+│   ├── test-cloud.py         # 云服务器环境完整测试
+│   ├── test-pubsub-final.py  # 完整的发布/订阅测试
+│   └── test-simple.py        # 简单的连接、订阅、发布测试
+└── 文档
+    ├── README.md             # 本文件
+    └── README.MQTT.md        # MQTT 详细配置说明
+```
+
 ## 文件说明
 
-### 核心脚本
+### 核心部署脚本
 
+- `setup-env.sh` - 环境依赖安装脚本（Python3、mosquitto-clients、paho-mqtt）
 - `setup-mqtt.sh` - MQTT 桥接服务安装脚本,创建 systemd 服务
 - `restart-mqtt.sh` - 快速重启 MQTT 桥接服务
+- `mqtt-config.sh` - MQTT 配置信息
+
+### Token 生成
+
 - `generate_onenet_token.py` - OneNET Token 生成工具
 
 ### 测试脚本
 
-- `verify-mo.py` - 验证使用设备 MO 连接和订阅
-- `test-*.py` / `test-*.sh` - 各种 MQTT 功能测试脚本
+- `verify-mo.py` - 验证使用设备 MO 连接和订阅（本地快速测试）
+- `test-cloud.py` - 云服务器环境完整测试脚本
+- `test-pubsub-final.py` - 完整的发布/订阅测试
+- `test-simple.py` - 简单的连接、订阅、发布测试
 
 ### 文档
 
+- `README.md` - 本文件，快速入门指南
 - `README.MQTT.md` - MQTT 详细的配置和使用说明
 
 ## 快速开始
@@ -34,9 +63,40 @@ python3 generate_onenet_token.py --type device --product_id <产品ID> --product
 ### 2. 本地测试
 
 ```bash
-# 验证连接
+# 快速验证 MO 设备连接
 python3 verify-mo.py
+
+# 完整测试（连接、订阅、发布）
+python3 test-simple.py
+
+# 完整的发布/订阅测试
+python3 test-pubsub-final.py
 ```
+
+### 2.1 环境准备（首次运行）
+
+```bash
+# 如果云服务器缺少依赖，先运行环境准备脚本
+sudo bash setup-env.sh
+```
+
+此脚本会安装：
+- Python3 和 pip3
+- mosquitto-clients (MQTT 命令行工具)
+- paho-mqtt (Python MQTT 库)
+
+### 2.2 云服务器测试
+
+```bash
+# 在云服务器上运行完整环境测试
+python3 test-cloud.py
+```
+
+**测试脚本说明**:
+- `verify-mo.py` - 最简单的测试，只验证 MO 设备连接（15秒）
+- `test-simple.py` - 包含连接、订阅、发布三个测试（约11秒）
+- `test-pubsub-final.py` - 完整的发布/订阅测试（约8秒）
+- `test-cloud.py` - 云服务器环境综合测试（包含4个测试，约15秒）
 
 ### 3. 服务器部署
 
