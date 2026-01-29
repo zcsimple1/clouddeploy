@@ -40,6 +40,19 @@
 
 ## 快速开始
 
+### 🚀 一键部署（推荐）
+
+```bash
+# 完整部署（所有服务）
+docker-compose -f docker-compose.all.yml --profile full up -d --build
+
+# 或仅部署 Web 应用
+docker-compose -f docker-compose.all.yml --profile web up -d --build
+
+# Web 应用 + 日志分析
+docker-compose -f docker-compose.all.yml --profile web --profile elk up -d --build
+```
+
 ### 步骤 1: 确保目录结构正确
 
 确保你的目录结构如上所示，所有项目在同一级目录。
@@ -209,47 +222,112 @@ tail -f /tmp/auto-update.log
 | `docker-compose.yml` | Nginx, CommonServ | Web 应用 + API |
 | `docker-compose.elk.yml` | Elasticsearch, Logstash, Kibana | 日志收集和分析 |
 | `docker-compose.emqx.yml` | EMQX + ELK | MQTT 私有服务器 |
-| `docker-compose.all.yml` | 所有服务 | 完整部署（推荐）|
+| `docker-compose.all.yml` | 所有服务 + Profile 支持 | 灵活部署（推荐）⭐ |
 
 ### 部署场景
 
+#### 🎯 推荐使用 docker-compose.all.yml
+
+`docker-compose.all.yml` 支持通过 **Profile** 灵活选择启动的服务：
+
+| Profile | 包含的服务 | 命令示例 |
+|---------|-----------|---------|
+| `web` | Nginx, CommonServ | `--profile web` |
+| `elk` | Elasticsearch, Logstash, Kibana | `--profile elk` |
+| `emqx` | EMQX | `--profile emqx` |
+| `full` | 所有服务 | `--profile full` 或不加参数 |
+
 #### 场景 1: 仅 Web 应用（最小部署）
 ```bash
-./deploy.sh
+docker-compose -f docker-compose.all.yml --profile web up -d --build
 ```
 
 #### 场景 2: Web 应用 + ELK 日志（开发环境）
 ```bash
-./deploy-all.sh
+docker-compose -f docker-compose.all.yml --profile web --profile elk up -d --build
 ```
 
-#### 场景 3: 所有服务（完整部署）⭐ 推荐
+#### 场景 3: Web 应用 + EMQX（不含 ELK）
 ```bash
+docker-compose -f docker-compose.all.yml --profile web --profile emqx up -d --build
+```
+
+#### 场景 4: ELK + EMQX（独立日志和 MQTT）
+```bash
+docker-compose -f docker-compose.all.yml --profile elk --profile emqx up -d --build
+```
+
+#### 场景 5: 所有服务（完整部署）⭐
+```bash
+docker-compose -f docker-compose.all.yml --profile full up -d --build
+# 或简单写法
 docker-compose -f docker-compose.all.yml up -d --build
 ```
 
-**服务列表：**
+**完整部署的服务列表：**
 - Nginx (8080)
 - CommonServ (8000)
-- Elasticsearch (9200)
-- Logstash (5044, 9600)
+- Elasticsearch (9200, 9300)
+- Logstash (5044, 5000, 9600)
 - Kibana (5601)
-- EMQX Dashboard (18083)
+- EMQX Dashboard (18083, 18084)
 - EMQX MQTT (1883, 8883, 8083, 8084)
 
-#### 场景 4: 仅 EMQX MQTT（独立 MQTT 服务器）
+#### 🔄 动态增减服务
+
 ```bash
-./deploy-emqx.sh
+# 启动 Web 应用
+docker-compose -f docker-compose.all.yml --profile web up -d
+
+# 稍后添加 ELK
+docker-compose -f docker-compose.all.yml --profile elk up -d
+
+# 再添加 EMQX
+docker-compose -f docker-compose.all.yml --profile emqx up -d
+
+# 停止 ELK（保留其他服务）
+docker-compose -f docker-compose.all.yml stop elasticsearch logstash kibana
+
+# 重启特定服务
+docker-compose -f docker-compose.all.yml restart nginx
 ```
 
-### ⚠️ 端口冲突说明
+### 传统部署方式（兼容性）
 
-**不能同时部署** `docker-compose.elk.yml` 和 `docker-compose.emqx.yml`，因为它们都包含 ELK 服务，端口会冲突。
+#### 使用独立 compose 文件
 
-**解决方案：**
-- ✅ 使用 `docker-compose.all.yml`（推荐）
-- ✅ 或选择其中一个部署
-- ❌ 不要同时启动 ELK 和 EMQX compose 文件
+```bash
+# 仅部署 Web 应用
+./deploy.sh
+
+# 部署 Web 应用 + ELK
+./deploy-all.sh
+
+# 仅部署 EMQX + ELK
+./deploy-emqx.sh
+
+# 仅部署 ELK
+./deploy-elk.sh
+```
+
+### ⚠️ 重要提示
+
+1. **端口冲突**：
+   - 不能同时部署 `docker-compose.elk.yml` 和 `docker-compose.emqx.yml`
+   - 两者都包含 ELK 服务，端口会冲突
+   - **推荐**：使用 `docker-compose.all.yml` 的 profile 功能
+
+2. **资源要求**：
+   - Web 应用: 约 512MB 内存
+   - ELK Stack: 约 3-4GB 内存
+   - EMQX: 约 1GB 内存
+   - 完整部署: 建议 8GB+ 可用内存
+
+3. **数据持久化**：
+   - 所有数据都挂载到宿主机目录
+   - Elasticsearch: `/root/data/elk/`
+   - EMQX: `/root/data/emqx/`
+   - 日志: `./logs/`
 
 ```bash
 # 手动拉取代码
