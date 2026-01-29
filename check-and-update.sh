@@ -49,6 +49,19 @@ if [ -d "../webtool" ]; then
     cd -
 fi
 
+# 检查 commonserv
+if [ -d "../commonserv" ]; then
+    cd ../commonserv
+    git fetch origin $(git rev-parse --abbrev-ref HEAD) >> $LOG_FILE 2>&1
+    LOCAL=$(git rev-parse HEAD)
+    REMOTE=$(git rev-parse @{u})
+    if [ "$LOCAL" != "$REMOTE" ]; then
+        echo "[$LOG_TIME] commonserv 有新代码" >> $LOG_FILE
+        HAS_UPDATE=true
+    fi
+    cd -
+fi
+
 # 检查 clouddeploy 自身
 cd .
 git fetch origin $(git rev-parse --abbrev-ref HEAD) >> $LOG_FILE 2>&1

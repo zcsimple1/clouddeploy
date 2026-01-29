@@ -18,6 +18,29 @@ services:
     container_name: combined-nginx
     networks:
       - elk
+    depends_on:
+      - commonserv
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  commonserv:
+    build:
+      context: ../commonserv
+      dockerfile: Dockerfile
+    container_name: commonserv
+    restart: unless-stopped
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ../commonserv:/app
+      - ./logs:/var/log/commonserv
+    ports:
+      - "8000:8000"
+    networks:
+      - elk
     logging:
       driver: "json-file"
       options:

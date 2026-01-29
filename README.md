@@ -8,6 +8,7 @@
 - **edutool**：中小学每日一练系统
 - **zcgames**：游戏项目
 - **webtool**：Web 工具项目
+- **commonserv**：FastAPI 微服务平台
 - **clouddeploy**：部署管理（当前项目）
 
 ## 目录结构要求
@@ -17,9 +18,11 @@
 ├── zcgames/          # 游戏项目
 ├── edutool/          # 教育工具项目
 ├── webtool/          # Web 工具项目
+├── commonserv/       # FastAPI 微服务平台
 └── clouddeploy/      # 当前项目
     ├── docker-compose.yml
     ├── docker-compose.elk.yml
+    ├── docker-compose.emqx.yml
     ├── nginx.conf
     ├── logstash/
     ├── pull-all.sh
@@ -27,10 +30,12 @@
     ├── status.sh
     ├── deploy-elk.sh
     ├── deploy-all.sh
+    ├── deploy-emqx.sh
     ├── check-and-update.sh
     ├── setup-auto-update.sh
     ├── stop-auto-update.sh
-    └── README.ELK.md
+    ├── README.ELK.md
+    └── README.EMQX.md
 ```
 
 ## 快速开始
@@ -70,6 +75,8 @@ cd ~/workspace/clouddeploy
 - **ZCGames**: http://localhost:8080/zcgames/
 - **EduTool**: http://localhost:8080/edutool/
 - **WebTool**: http://localhost:8080/webtool/
+- **CommonServ API**: http://localhost:8080/api/ (或直接访问 http://localhost:8000/)
+- **API 文档**: http://localhost:8080/api/docs
 
 ## 脚本说明
 
@@ -90,7 +97,8 @@ clouddeploy 会自动检测以下项目的代码更新：
 1. **zcgames** - 如果有更新，自动拉取并重启容器
 2. **edutool** - 如果有更新，自动拉取并重启容器
 3. **webtool** - 如果有更新，自动拉取并重启容器
-4. **clouddeploy 自身** - 如果有更新，自动拉取、重新构建并重启容器
+4. **commonserv** - 如果有更新，自动拉取并重启容器
+5. **clouddeploy 自身** - 如果有更新，自动拉取、重新构建并重启容器
 
 ### 工作流程
 
@@ -104,6 +112,37 @@ clouddeploy 会自动检测以下项目的代码更新：
     - 如果是 clouddeploy 配置更新：重新构建并启动
     - 如果仅是项目代码更新：仅重启容器
     - 记录更新日志
+```
+
+## CommonServ FastAPI 服务
+
+### 服务说明
+
+CommonServ 是一个基于 FastAPI 的微服务平台，当前提供：
+- **MQTT Token 生成服务** - 为 OneNET 物联网平台生成设备/产品级 Token
+- **健康检查接口** - 服务状态监控
+
+### 访问地址
+
+- **API 服务**: http://localhost:8080/api/ (通过 Nginx 代理)
+- **直接访问**: http://localhost:8000/
+- **API 文档**: http://localhost:8080/api/docs (Swagger UI)
+- **OpenAPI**: http://localhost:8080/api/openapi.json
+
+### API 端点示例
+
+```bash
+# 获取服务列表
+curl http://localhost:8080/api/
+
+# 健康检查
+curl http://localhost:8080/api/health
+
+# OneNET MQTT Token 快速配置
+curl http://localhost:8080/api/mqtt/onenet/v1/config
+
+# 生成 MO 设备 Token
+curl http://localhost:8080/api/mqtt/onenet/v1/token/device/mo
 ```
 
 ## 常用命令
