@@ -46,6 +46,7 @@ services:
     restart: unless-stopped
     environment:
       - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app
     volumes:
       - ${COMPOSE_PROJECT_DIR:-.}/../commonserv:/app
       - ./logs:/var/log/commonserv
