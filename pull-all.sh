@@ -47,7 +47,20 @@ if [ -d "../commonserv" ]; then
     git pull origin $(git rev-parse --abbrev-ref HEAD)
     cd -
 else
-    echo "⚠️  commonserv 目录不存在，跳过"
+    echo "⚠️  commonserv 目录不存在，尝试克隆..."
+    cd ..
+    # 优先尝试 HTTPS 克隆（无需 SSH 密钥），失败则尝试 SSH
+    if git clone https://github.com/zcsimple1/commonserv.git; then
+        echo "✅ commonserv 克隆成功 (HTTPS)"
+        cd clouddeploy
+    elif git clone git@github.com:zcsimple1/commonserv.git; then
+        echo "✅ commonserv 克隆成功 (SSH)"
+        cd clouddeploy
+    else
+        echo "❌ commonserv 克隆失败"
+        echo "   请手动执行: cd .. && git clone https://github.com/zcsimple1/commonserv.git"
+        cd clouddeploy
+    fi
 fi
 
 # 拉取 clouddeploy 项目自身
