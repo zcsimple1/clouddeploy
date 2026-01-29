@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ELK MQTT 桥接脚本 - 订阅 OneNET MQTT 并发送到 Logstash
-# 使用方法: bash setup-mqtt.sh
+# 使用方法: bash setup-mqtt.sh [MO|MO1]
 
 set -e
 
@@ -10,42 +10,33 @@ echo "ELK MQTT 桥接安装脚本"
 echo "================================"
 echo ""
 
-# MQTT 配置
-# ============================================================================
-# 配置选择: 设置 DEVICE_ID 为要使用的设备
-# ============================================================================
-DEVICE_ID=${1:-"MO"}  # 默认使用 MO，可通过 bash setup-mqtt.sh MO1 切换到 MO1
+# 选择设备
+DEVICE_ID=${1:-"MO"}  # 默认使用 MO，可通过参数指定 MO1
+
+echo "使用设备: $DEVICE_ID"
+echo ""
 
 # 根据 DEVICE_ID 选择配置
-if [ "$DEVICE_ID" = "MO" ]; then
-    # 配置1: MO (产品级 Token)
-    MQTT_HOST="mqtts.heclouds.com"
-    MQTT_PORT="1883"
-    MQTT_USER="v6IkuqD6vh"
-    MQTT_PASS="version=2018-10-31&res=products%2Fv6IkuqD6vh&et=1855626888&method=sha1&sign=xhR6Azo%2BPoFz7Tw0iFA1uMKNXNs%3D"
-    CLIENT_ID="MO"
-elif [ "$DEVICE_ID" = "MO1" ]; then
-    # 配置2: MO1 (设备级 Token)
+if [ "$DEVICE_ID" = "MO1" ]; then
+    # MO1 配置 (设备级 Token)
     MQTT_HOST="mqtts.heclouds.com"
     MQTT_PORT="1883"
     MQTT_USER="v6IkuqD6vh"
     MQTT_PASS="version=2018-10-31&res=products%2Fv6IkuqD6vh%2Fdevices%2FMO1&et=1772105871&method=sha1&sign=ZZoc17%2BbrxprIZ7prgo82Y%2FTDG4%3D"
     CLIENT_ID="MO1"
+elif [ "$DEVICE_ID" = "MO" ]; then
+    # MO 配置 (产品级 Token)
+    MQTT_HOST="mqtts.heclouds.com"
+    MQTT_PORT="1883"
+    MQTT_USER="v6IkuqD6vh"
+    MQTT_PASS="version=2018-10-31&res=products%2Fv6IkuqD6vh&et=1855626888&method=sha1&sign=xhR6Azo%2BPoFz7Tw0iFA1uMKNXNs%3D"
+    CLIENT_ID="MO"
 else
     echo "错误: 不支持的设备 ID，请使用 MO 或 MO1"
     exit 1
 fi
 
-# ============================================================================
-# 配置组2: 设备级Token (备用)
-# 如果MO不可用,可以切换到此配置使用MO1作为Client ID
-# ============================================================================
-# MQTT_HOST="mqtts.heclouds.com"
-# MQTT_PORT="1883"
-# MQTT_USER="v6IkuqD6vh"
-# MQTT_PASS="version=2018-10-31&res=products%2Fv6IkuqD6vh%2Fdevices%2FMO&et=1772098636&method=sha1&sign=vzb4PV%2FK%2FvPLSdBd%2FVOVRHrSX44%3D"
-
-# 订阅主题 (使用设备自己的主题)
+# 订阅主题 (OneNET 物模型主题)
 MQTT_TOPICS="\$sys/v6IkuqD6vh/${DEVICE_ID}/thing/#"
 LOGSTASH_URL="http://localhost:5000"
 INSTALL_DIR="/root/workspace/clouddeploy/mqtt/elk-mqtt"
@@ -141,14 +132,21 @@ sudo mv /tmp/elk-mqtt.service /etc/systemd/system/elk-mqtt.service
 echo "4. 重载 systemd..."
 sudo systemctl daemon-reload
 
-# 5. 启动服务
-echo "5. 启动 MQTT 桥接服务..."
-sudo systemctl start elk-mqtt.service
+# 5. 停止旧服务
+echo "5. 停止旧服务..."
+sudo systemctl stop elk-mqtt 2>/dev/null || true
+
+# 6. 启动服务
+echo "6. 启动 MQTT 桥接服务..."
+sudo systemctl start elk-mqtt
 
 echo ""
 echo "=========================================="
 echo "安装完成！"
 echo "=========================================="
+echo ""
+echo "使用设备: $DEVICE_ID"
+echo "订阅主题: $MQTT_TOPICS"
 echo ""
 echo "常用命令："
 echo "  查看服务状态:  sudo systemctl status elk-mqtt"
@@ -156,6 +154,10 @@ echo "  查看服务日志:  sudo journalctl -u elk-mqtt -f"
 echo "  停止服务:     sudo systemctl stop elk-mqtt"
 echo "  启动服务:     sudo systemctl start elk-mqtt"
 echo "  重启服务:     sudo systemctl restart elk-mqtt"
+echo ""
+echo "切换设备:"
+echo "  使用 MO:  sudo bash setup-mqtt.sh MO"
+echo "  使用 MO1: sudo bash setup-mqtt.sh MO1"
 echo ""
 echo "查看服务状态..."
 sudo systemctl status elk-mqtt.service --no-pager
