@@ -28,14 +28,14 @@ services:
 
   commonserv:
     build:
-      context: ../commonserv
+      context: ${COMPOSE_PROJECT_DIR:-.}/../commonserv
       dockerfile: Dockerfile
     container_name: commonserv
     restart: unless-stopped
     environment:
       - PYTHONUNBUFFERED=1
     volumes:
-      - ../commonserv:/app
+      - ${COMPOSE_PROJECT_DIR:-.}/../commonserv:/app
       - ./logs:/var/log/commonserv
     ports:
       - "8000:8000"
