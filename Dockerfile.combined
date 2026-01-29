@@ -1,25 +1,28 @@
-# 使用轻量级的nginx镜像
+# Nginx 反向代理容器 - 用于托管多个 Web 应用
+#
+# 此容器提供以下服务的反向代理和静态文件服务：
+# - zcgames: 游戏项目（通过卷挂载）
+# - edutool: 教育工具项目（通过卷挂载）
+# - webtool: Web 工具项目（通过卷挂载）
+# - commonserv: FastAPI 微服务平台（反向代理到 /api/）
+
 FROM nginx:alpine
 
-# 删除nginx默认的配置和静态文件
+# 清除 Nginx 默认内容
 RUN rm -rf /usr/share/nginx/html/*
 
-# 复制自定义nginx配置
+# 复制自定义 Nginx 配置
 COPY nginx.conf /etc/nginx/nginx.conf
 
 # 创建项目目录结构
-RUN mkdir -p /usr/share/nginx/html/zcgames /usr/share/nginx/html/edutool /usr/share/nginx/html/webtool
+# 注意：实际内容通过 docker-compose.yml 的 volumes 挂载提供
+# 这里只创建空目录，避免卷挂载时出现权限问题
+RUN mkdir -p /usr/share/nginx/html/zcgames && \
+    mkdir -p /usr/share/nginx/html/edutool && \
+    mkdir -p /usr/share/nginx/html/webtool
 
-# 复制 edutool 项目文件（当前目录）
-# 注意：其他两个项目通过卷挂载方式提供，不需要在构建时复制
-COPY index.html coming_soon.html test_ad_failure.html README.md /usr/share/nginx/html/edutool/
-COPY ads/ /usr/share/nginx/html/edutool/ads/
-COPY games/ /usr/share/nginx/html/edutool/games/
-COPY tools/ /usr/share/nginx/html/edutool/tools/
-COPY primary_school/ /usr/share/nginx/html/edutool/primary_school/
-
-# 暴露80端口
+# 暴露 HTTP 端口
 EXPOSE 80
 
-# 启动nginx
+# 启动 Nginx（前台运行）
 CMD ["nginx", "-g", "daemon off;"]

@@ -1,0 +1,157 @@
+# 完整部署配置 - Web 应用 + ELK + EMQX
+#
+# 此文件整合了所有服务：
+# - Web 应用 (Nginx + CommonServ)
+# - ELK Stack (Elasticsearch + Logstash + Kibana)
+# - EMQX MQTT Broker
+#
+# 启动命令: docker-compose -f docker-compose.all.yml up -d
+
+services:
+  # ==================== Web 应用服务 ====================
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.combined
+    ports:
+      - "8080:80"
+    volumes:
+      - ../zcgames:/usr/share/nginx/html/zcgames:ro
+      - .:/usr/share/nginx/html/edutool:ro
+      - ../webtool:/usr/share/nginx/html/webtool:ro
+      - ./logs:/var/log/nginx
+    restart: unless-stopped
+    container_name: combined-nginx
+    networks:
+      - elk
+    depends_on:
+      - commonserv
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  commonserv:
+    build:
+      context: ${COMPOSE_PROJECT_DIR:-.}/../commonserv
+      dockerfile: Dockerfile
+    container_name: commonserv
+    restart: unless-stopped
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ${COMPOSE_PROJECT_DIR:-.}/../commonserv:/app
+      - ./logs:/var/log/commonserv
+    ports:
+      - "8000:8000"
+    networks:
+      - elk
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ==================== ELK Stack ====================
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - /root/data/elk/elasticsearch:/usr/share/elasticsearch/data
+    networks:
+      - elk
+    restart: unless-stopped
+
+  logstash:
+    build:
+      context: .
+      dockerfile: Dockerfile.logstash
+    container_name: logstash
+    ports:
+      - "5044:5044"
+      - "5000:5000/tcp"
+      - "5000:5000/udp"
+      - "9600:9600"
+    volumes:
+      - /root/data/elk/logstash/pipeline:/usr/share/logstash/pipeline:ro
+      - /root/data/elk/logstash/config:/usr/share/logstash/config:ro
+    networks:
+      - elk
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.12.0
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    volumes:
+      - /root/data/elk/kibana/data:/usr/share/kibana/data
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - SERVER_HOST=0.0.0.0
+      - SERVER_PORT=5601
+    networks:
+      - elk
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+
+  # ==================== EMQX MQTT Broker ====================
+  emqx:
+    image: emqx/emqx:5.7.1
+    container_name: emqx
+    ports:
+      # MQTT over TCP
+      - "1883:1883"
+      # MQTT over TLS (SSL)
+      - "8883:8883"
+      # MQTT over WebSocket
+      - "8083:8083"
+      # MQTT over Secure WebSocket (WSS)
+      - "8084:8084"
+      # EMQX Dashboard (HTTP API)
+      - "18083:18083"
+      # EMQX Management API
+      - "18084:18084"
+      # gRPC API
+      - "5369:5369"
+    environment:
+      - EMQX_NAME=emqx
+      - EMQX_HOST=127.0.0.1
+      # Dashboard 认证
+      - EMQX_DASHBOARD__DEFAULT_USERNAME=admin
+      - EMQX_DASHBOARD__DEFAULT_PASSWORD=public
+      # 数据库配置
+      - EMQX__LOG__LEVEL=info
+      # 启用匿名访问（生产环境建议关闭）
+      - EMQX__ALLOW_ANONYMOUS=true
+      # 持久化数据
+      - EMQX__Mnesia__DIR=/opt/emqx/data
+    volumes:
+      # 数据持久化
+      - /root/data/emqx/data:/opt/emqx/data
+      - /root/data/emqx/log:/opt/emqx/log
+      - /root/data/emqx/etc:/opt/emqx/etc
+    networks:
+      - elk
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "emqx", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  elk:
+    driver: bridge

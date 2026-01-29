@@ -200,6 +200,65 @@ tail -f /tmp/auto-update.log
 ./status.sh
 ```
 
+## 部署选项说明
+
+### docker-compose 文件说明
+
+| 文件 | 服务 | 用途 |
+|------|------|------|
+| `docker-compose.yml` | Nginx, CommonServ | Web 应用 + API |
+| `docker-compose.elk.yml` | Elasticsearch, Logstash, Kibana | 日志收集和分析 |
+| `docker-compose.emqx.yml` | EMQX + ELK | MQTT 私有服务器 |
+| `docker-compose.all.yml` | 所有服务 | 完整部署（推荐）|
+
+### 部署场景
+
+#### 场景 1: 仅 Web 应用（最小部署）
+```bash
+./deploy.sh
+```
+
+#### 场景 2: Web 应用 + ELK 日志（开发环境）
+```bash
+./deploy-all.sh
+```
+
+#### 场景 3: 所有服务（完整部署）⭐ 推荐
+```bash
+docker-compose -f docker-compose.all.yml up -d --build
+```
+
+**服务列表：**
+- Nginx (8080)
+- CommonServ (8000)
+- Elasticsearch (9200)
+- Logstash (5044, 9600)
+- Kibana (5601)
+- EMQX Dashboard (18083)
+- EMQX MQTT (1883, 8883, 8083, 8084)
+
+#### 场景 4: 仅 EMQX MQTT（独立 MQTT 服务器）
+```bash
+./deploy-emqx.sh
+```
+
+### ⚠️ 端口冲突说明
+
+**不能同时部署** `docker-compose.elk.yml` 和 `docker-compose.emqx.yml`，因为它们都包含 ELK 服务，端口会冲突。
+
+**解决方案：**
+- ✅ 使用 `docker-compose.all.yml`（推荐）
+- ✅ 或选择其中一个部署
+- ❌ 不要同时启动 ELK 和 EMQX compose 文件
+
+```bash
+# 手动拉取代码
+./pull-all.sh
+
+# 查看项目状态
+./status.sh
+```
+
 ## 常用操作速查
 
 | 操作 | 命令 |
