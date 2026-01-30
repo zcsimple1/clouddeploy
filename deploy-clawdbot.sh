@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Clawdbot 部署脚本
+# Clawdbot 部署脚本（直接在服务器上运行）
+# 使用方法：ssh 到服务器后执行此脚本
 
 set -e
 
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-cd "$SCRIPT_DIR"
+cd "$( dirname "${BASH_SOURCE[0]}" )"
 
 echo "=========================================="
 echo "部署 Clawdbot AI 助手"
@@ -13,24 +13,18 @@ echo "=========================================="
 
 # 创建数据目录
 echo "创建数据目录..."
-ssh root@101.35.135.63 "mkdir -p /root/data/clawdbot/ollama /root/data/clawdbot/n8n"
-
-# 上传 docker-compose 文件
-echo "上传配置文件..."
-scp docker-compose.clawdbot.yml root@101.35.135.63:/root/clouddeploy/
-
-# 部署 Clawdbot
-echo "部署 Clawdbot 服务..."
-ssh root@101.35.135.63 << 'EOF'
-cd /root/clouddeploy
+mkdir -p /root/data/clawdbot/ollama /root/data/clawdbot/n8n
 
 # 停止旧服务（如果存在）
+echo "停止旧服务..."
 docker-compose -f docker-compose.clawdbot.yml down
 
 # 拉取最新镜像
+echo "拉取最新镜像..."
 docker-compose -f docker-compose.clawdbot.yml pull
 
 # 启动服务
+echo "启动服务..."
 docker-compose -f docker-compose.clawdbot.yml up -d
 
 echo "=========================================="
@@ -50,4 +44,3 @@ echo "下载模型（进入容器执行）："
 echo "docker exec -it clawdbot-ollama bash"
 echo "ollama pull llama3.2:3b"
 echo "=========================================="
-EOF

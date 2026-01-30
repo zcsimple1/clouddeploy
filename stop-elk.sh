@@ -1,15 +1,15 @@
 #!/bin/bash
 
-# 停止 ELK 服务脚本
+# 停止 ELK 服务脚本（直接在服务器上运行）
+# 使用方法：ssh 到服务器后执行此脚本
 
 set -e
+
+cd "$( dirname "${BASH_SOURCE[0]}" )"
 
 echo "=========================================="
 echo "停止 ELK Stack 服务"
 echo "=========================================="
-
-ssh root@101.35.135.63 << 'EOF'
-cd /root/clouddeploy
 
 # 停止 ELK 服务
 docker-compose -f docker-compose.all.yml --profile elk down
@@ -24,4 +24,3 @@ echo ""
 echo "如需重新启动 ELK，执行："
 echo "docker-compose -f docker-compose.all.yml --profile elk up -d"
 echo "=========================================="
-EOF
