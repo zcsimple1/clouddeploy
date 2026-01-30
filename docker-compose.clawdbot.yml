@@ -1,0 +1,81 @@
+# Clawdbot AI Assistant 部署配置
+#
+# 此文件用于独立部署 Clawdbot AI 助手
+# 启动命令: docker-compose -f docker-compose.clawdbot.yml up -d
+#
+# 端口说明:
+# - 8081: Clawdbot Web UI (原8080，为避免与nginx冲突改为8081)
+# - 11434: Ollama API
+# - 5678: n8n Web UI (用于工作流编排，如需启用请取消注释)
+
+services:
+  clawdbot:
+    image: ghcr.io/clawdbot/clawdbot:latest
+    container_name: clawdbot
+    restart: unless-stopped
+    ports:
+      - "8081:8080"  # 修改为8081避免与nginx的8080冲突
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - CLAWDBOT_ADMIN_USERNAME=admin
+      - CLAWDBOT_ADMIN_PASSWORD=admin  # 首次登录后请修改
+      - CLAWDBOT_DATABASE_TYPE=sqlite
+      - CLAWDBOT_DATABASE_PATH=/data/clawdbot.db
+      - CLAWDBOT_LOG_LEVEL=info
+    volumes:
+      - /root/data/clawdbot:/data
+    networks:
+      - clawdbot-net
+    depends_on:
+      - ollama
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: clawdbot-ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - /root/data/clawdbot/ollama:/root/.ollama
+    environment:
+      - OLLAMA_NUM_THREAD=4  # 根据你的CPU核心数调整
+    networks:
+      - clawdbot-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: clawdbot-n8n
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=admin  # 首次登录后请修改
+      - N8N_HOST=0.0.0.0
+      - N8N_PORT=5678
+      - WEBHOOK_URL=http://101.35.135.63:5678
+      - N8N_LOG_LEVEL=info
+    volumes:
+      - /root/data/clawdbot/n8n:/home/node/.n8n
+    networks:
+      - clawdbot-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  clawdbot-net:
+    driver: bridge
