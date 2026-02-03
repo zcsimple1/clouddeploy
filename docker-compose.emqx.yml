@@ -81,13 +81,14 @@ services:
       - EMQX__LOG__LEVEL=info
       # 启用匿名访问（生产环境建议关闭）
       - EMQX__ALLOW_ANONYMOUS=true
-      # 持久化数据
-      - EMQX__Mnesia__DIR=/opt/emqx/data
+      # Cookie 配置
+      - EMQX_NODE__COOKIE=emqxsecretcookie
+      # Dashboard 监听地址
+      - EMQX_DASHBOARD__LISTENERS__HTTP__BIND=0.0.0.0:18083
     volumes:
       # 数据持久化
       - /root/data/emqx/data:/opt/emqx/data
       - /root/data/emqx/log:/opt/emqx/log
-      - /root/data/emqx/etc:/opt/emqx/etc
     networks:
       - elk
     restart: unless-stopped
