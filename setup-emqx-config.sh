@@ -14,6 +14,7 @@ echo "✓ 配置目录创建完成"
 # 2. 复制配置文件
 echo "2. 复制配置文件..."
 cp emqx-config/emqx.conf /root/data/emqx/etc/
+cp emqx-config/acl.conf /root/data/emqx/etc/
 echo "✓ 配置文件复制完成"
 
 # 3. 重启 EMQX
