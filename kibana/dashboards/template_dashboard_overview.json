@@ -1,0 +1,20 @@
+{
+  "version": "8.11.0",
+  "objects": [
+    {
+      "id": "dashboard-onenet-overview",
+      "type": "dashboard",
+      "attributes": {
+        "title": "OneNet 设备状态总览",
+        "type": "dashboard",
+        "options": {
+          "useMargins": true,
+          "syncCursor": true,
+          "syncColors": true,
+          "syncTooltips": true
+        },
+        "panelsJSON": "[{\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15},\"version\":\"8.11.0\",\"panelIndex\":\"1\",\"type\":\"metric\",\"embeddableConfig\":{},\"attributes\":{\"title\":\"环境温度\",\"description\":\"\",\"metric\":{\"metrics\":[{\"id\":\"1\",\"type\":\"avg\",\"field\":\"data.params.temp.value\"}],\"source\":\"esql\"},\"visConfig\":{\"metric\":{\"colorSchema\":\"Green to Red\",\"metricColorMode\":\"None\",\"style\":{\"label\":{\"show\":true}},\"percentageMode\":false,\"useRanges\":false}}},\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filters\":[]},{\"gridData\":{\"x\":24,\"y\":0,\"w\":24,\"h\":15},\"version\":\"8.11.0\",\"panelIndex\":\"2\",\"type\":\"metric\",\"embeddableConfig\":{},\"attributes\":{\"title\":\"环境湿度\",\"description\":\"\",\"metric\":{\"metrics\":[{\"id\":\"1\",\"type\":\"avg\",\"field\":\"humi\"}],\"source\":\"esql\"},\"visConfig\":{\"metric\":{\"colorSchema\":\"Green to Red\",\"metricColorMode\":\"None\",\"style\":{\"label\":{\"show\":true}},\"percentageMode\":false,\"useRanges\":false}}},\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filters\":[]}]"
+      }
+    }
+  ]
+}
