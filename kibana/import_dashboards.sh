@@ -69,25 +69,25 @@ main() {
 
     # 导入各 Dashboard
     # 1. 设备状态总览
-    import_dashboard "$DASHBOARDS_DIR/dashboard_overview.ndjson" "设备状态总览"
+    import_dashboard "$DASHBOARDS_DIR/overview.ndjson" "设备状态总览"
 
     # 2. 水箱监控
-    import_dashboard "$DASHBOARDS_DIR/dashboard_tanks.ndjson" "水箱监控"
+    import_dashboard "$DASHBOARDS_DIR/tanks.ndjson" "水箱监控"
 
     # 3. 温度监控
-    import_dashboard "$DASHBOARDS_DIR/dashboard_temperature.ndjson" "温度监控"
+    import_dashboard "$DASHBOARDS_DIR/temperature.ndjson" "温度监控"
 
     # 4. 水泵监控
-    import_dashboard "$DASHBOARDS_DIR/dashboard_pumps.ndjson" "水泵监控"
+    import_dashboard "$DASHBOARDS_DIR/pumps.ndjson" "水泵监控"
 
     # 5. 发热管监控
-    import_dashboard "$DASHBOARDS_DIR/dashboard_heaters.ndjson" "发热管监控"
+    import_dashboard "$DASHBOARDS_DIR/heaters.ndjson" "发热管监控"
 
     # 6. 流量监控
-    import_dashboard "$DASHBOARDS_DIR/dashboard_flowmeters.ndjson" "流量监控"
+    import_dashboard "$DASHBOARDS_DIR/flowmeters.ndjson" "流量监控"
 
     # 7. 其他设备
-    import_dashboard "$DASHBOARDS_DIR/dashboard_others.ndjson" "其他设备"
+    import_dashboard "$DASHBOARDS_DIR/others.ndjson" "其他设备"
 
     echo ""
     echo -e "${GREEN}=== 导入完成 ===${NC}"
