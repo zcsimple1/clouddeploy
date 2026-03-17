@@ -1,0 +1,126 @@
+# Web 应用 + ELK Stack（不含 EMQX）
+#
+# 此文件整合了 Web 应用和 ELK 服务：
+# - Web 应用 (Nginx + CommonServ)
+# - ELK Stack (Elasticsearch + Logstash + Kibana)
+#
+# 启动命令: docker-compose -f docker-compose.web-elk.yml --profile full up -d
+
+services:
+  # ==================== Web 应用服务 ====================
+  nginx:
+    profiles:
+      - web
+      - full
+    build:
+      context: .
+      dockerfile: Dockerfile.combined
+    ports:
+      - "8080:80"
+    volumes:
+      - ../zcgames:/usr/share/nginx/html/zcgames:ro
+      - .:/usr/share/nginx/html/edutool:ro
+      - ../webtool:/usr/share/nginx/html/webtool:ro
+      - ./logs:/var/log/nginx
+    restart: unless-stopped
+    container_name: combined-nginx
+    networks:
+      - elk
+    depends_on:
+      - commonserv
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  commonserv:
+    profiles:
+      - web
+      - full
+    build:
+      context: ${COMPOSE_PROJECT_DIR:-.}/../commonserv
+      dockerfile: Dockerfile
+    container_name: commonserv
+    restart: unless-stopped
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app
+    volumes:
+      - ${COMPOSE_PROJECT_DIR:-.}/../commonserv:/app
+      - ./logs:/var/log/commonserv
+    ports:
+      - "8000:8000"
+    networks:
+      - elk
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ==================== ELK Stack ====================
+  elasticsearch:
+    profiles:
+      - elk
+      - full
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - /root/data/elk/elasticsearch:/usr/share/elasticsearch/data
+    networks:
+      - elk
+    restart: unless-stopped
+
+  logstash:
+    profiles:
+      - elk
+      - full
+    build:
+      context: .
+      dockerfile: Dockerfile.logstash
+    container_name: logstash
+    ports:
+      - "5044:5044"
+      - "5000:5000/tcp"
+      - "5000:5000/udp"
+      - "9600:9600"
+    volumes:
+      - /root/data/elk/logstash/pipeline:/usr/share/logstash/pipeline:ro
+      - /root/data/elk/logstash/config:/usr/share/logstash/config:ro
+    networks:
+      - elk
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+
+  kibana:
+    profiles:
+      - elk
+      - full
+    image: docker.elastic.co/kibana/kibana:8.12.0
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    volumes:
+      - /root/data/elk/kibana/data:/usr/share/kibana/data
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - SERVER_HOST=0.0.0.0
+      - SERVER_PORT=5601
+    networks:
+      - elk
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+
+networks:
+  elk:
+    driver: bridge
