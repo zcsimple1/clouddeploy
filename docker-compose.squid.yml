@@ -1,0 +1,35 @@
+# Squid 代理服务器配置
+#
+# 启动命令: docker-compose -f docker-compose.squid.yml up -d
+#
+# 访问地址:
+# - 代理端口: 3128
+# - 通过 Nginx: http://你的域名/squid/ (仅用于管理界面)
+# - SquidManager (需要额外配置认证): http://你的域名/squid-manager/
+
+services:
+  squid:
+    image: ubuntu/squid:latest
+    container_name: squid-proxy
+    restart: unless-stopped
+    ports:
+      - "3128:3128"  # HTTP/HTTPS 代理端口
+      - "3129:3129"  # ICP 端口
+    volumes:
+      - ./squid/squid.conf:/etc/squid/squid.conf:ro
+      - /root/data/squid/logs:/var/log/squid
+      - /root/data/squid/cache:/var/spool/squid
+    networks:
+      - elk
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    environment:
+      - SQUID_CONFIG_FILE=/etc/squid/squid.conf
+
+networks:
+  elk:
+    external: false
+    driver: bridge
