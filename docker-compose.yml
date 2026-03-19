@@ -5,6 +5,7 @@ services:
       dockerfile: Dockerfile.combined
     ports:
       - "80:80"
+      - "8888:8888"
     volumes:
       # 挂载 zcgames 项目目录（自动更新）
       - ../zcgames:/usr/share/nginx/html/zcgames:ro
