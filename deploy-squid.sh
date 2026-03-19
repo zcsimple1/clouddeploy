@@ -105,17 +105,15 @@ acl Safe_ports port 777
 
 acl CONNECT method CONNECT
 
-# 访问控制（优先级从高到低）
+# 访问控制（正确的顺序：先拒绝，再允许）
+# 拒绝非安全端口
+http_access deny !Safe_ports
+# 拒绝非 SSL 端口的 CONNECT 方法
+http_access deny CONNECT !SSL_ports
+# 允许指定IP访问
 http_access allow $ALLOW_RULE
 http_access allow localnet
 http_access allow localhost
-
-# 拒绝非安全端口
-http_access deny !Safe_ports
-http_access deny CONNECT !SSL_ports
-
-# 拒绝所有其他访问
-http_access deny all
 
 # 主机名
 visible_hostname squid-proxy
