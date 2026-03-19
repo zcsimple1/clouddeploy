@@ -44,14 +44,19 @@ chmod 777 /root/data/squid/cache /root/data/squid/logs
 
 # 生成 Squid 配置文件（动态注入允许的IP）
 echo "生成 Squid 配置文件..."
+
+# 判断是否允许所有IP
+if [ "$ALLOWED_IP" = "0.0.0.0/0" ]; then
+    ALLOW_RULE="all"
+else
+    ALLOW_RULE="allowed_ips"
+fi
+
 cat > ./squid/squid.conf <<EOF
 # Squid 配置文件（自动生成）
 
 # 端口配置
 http_port 3128
-
-# 缓存管理器
-cache_manager admin@example.com
 
 # 缓存目录
 cache_dir ufs /var/spool/squid 1000 16 256
@@ -73,9 +78,17 @@ acl localnet src 172.16.0.0/12
 acl localnet src 192.168.0.0/16
 acl localnet src fc00::/7
 acl localnet src fe80::/10
+EOF
 
 # 动态注入允许的IP
-acl allowed_ips src $ALLOWED_IP
+if [ "$ALLOWED_IP" = "0.0.0.0/0" ]; then
+    echo "# 允许所有IP访问" >> ./squid/squid.conf
+else
+    echo "acl allowed_ips src $ALLOWED_IP" >> ./squid/squid.conf
+fi
+
+# 继续写入配置
+cat >> ./squid/squid.conf <<EOF
 
 # SSL 端口
 acl SSL_ports port 443
@@ -93,7 +106,7 @@ acl Safe_ports port 777
 acl CONNECT method CONNECT
 
 # 访问控制（优先级从高到低）
-http_access allow allowed_ips
+http_access allow $ALLOW_RULE
 http_access allow localnet
 http_access allow localhost
 
@@ -103,12 +116,6 @@ http_access deny CONNECT !SSL_ports
 
 # 拒绝所有其他访问
 http_access deny all
-
-# 管理接口
-http_access allow manager localhost
-
-# 缓存管理员邮箱
-cache_mgr admin@example.com
 
 # 主机名
 visible_hostname squid-proxy
