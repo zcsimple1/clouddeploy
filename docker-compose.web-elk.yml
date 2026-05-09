@@ -78,6 +78,11 @@ services:
     networks:
       - elk
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
 
   logstash:
     profiles:
@@ -100,6 +105,11 @@ services:
     depends_on:
       - elasticsearch
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
 
   kibana:
     profiles:
@@ -120,6 +130,11 @@ services:
     depends_on:
       - elasticsearch
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
 
 networks:
   elk:
