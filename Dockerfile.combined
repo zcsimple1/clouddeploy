@@ -22,7 +22,7 @@ RUN mkdir -p /usr/share/nginx/html/zcgames && \
     mkdir -p /usr/share/nginx/html/webtool
 
 # 暴露 HTTP 端口
-EXPOSE 80
+EXPOSE 80 8080
 
 # 启动 Nginx（前台运行）
 CMD ["nginx", "-g", "daemon off;"]

@@ -18,6 +18,7 @@ services:
       dockerfile: Dockerfile.combined
     ports:
       - "80:80"
+      - "8080:8080"
     volumes:
       - ../zcgames:/usr/share/nginx/html/zcgames:ro
       - .:/usr/share/nginx/html/edutool:ro
