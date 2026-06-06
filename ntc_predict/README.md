@@ -1,63 +1,82 @@
 # NTC → 热电偶 温度预测模型
 
-## 数据来源
+## 核心结论
 
-- **数据源**: ELK `logs-onenet-*` 索引（2026年6月饮水机实验）
-- **样本量**: 259,486 条（训练采样 80,000 条）
-- **输入字段**: `data.params.N4_T.value`（NTC 温度传感器）
-- **目标字段**: `data.params.OT4_C.value`（热电偶 K 型传感器）
+**N4_T (NTC) 单独就能很好地预测 OT4_C (热电偶)，其他参数提升有限。**
 
-## 模型性能
+| 模型 | 参数 | MAE | RMSE | R² |
+|------|------|-----|------|-----|
+| 3阶多项式 ⭐ | N4_T | 0.866°C | 1.352°C | 0.973 |
+| 混合模型 | N4_T+AT+temp+N4_R | 0.844°C | 1.254°C | 0.977 |
+| 8参数线性 | 全部字段 | 0.508°C | 0.966°C | 0.986 ⚠️过拟合 |
 
-| 模型 | MAE (°C) | RMSE (°C) | R² |
-|------|----------|-----------|-----|
-| 线性回归 | 1.027 | 2.037 | 0.9776 |
-| 2阶多项式 | 0.927 | 1.948 | 0.9795 |
-| **3阶多项式** ⭐ | **0.888** | **1.915** | **0.9802** |
+> **推荐**：Kibana Scripted Field 用纯 N4_T 多项式即可，简单且精度足够。
 
-## 使用方法
+---
 
-### 1. 直接使用预测函数
+## 为什么不需要很多参数？
 
-```python
-from ntc_predict_model import predict_ot4, predict_ot4_fast
+NTC (N4_T) 和热电偶 (OT4_C) 测量的是**同一个物理量**（水温），它们之间的差异主要来自：
 
-# NTC 读数 55°C → 预测热电偶温度
-real_temp = predict_ot4(55.0)
-print(f"预测: {real_temp:.1f}°C")  # → 约 55.6°C
+1. **NTC 非线性** → 3阶多项式校准 (已解决，R²=0.97)
+2. **环境温度影响** → AT/temp 仅贡献 +2.5% 改进
+3. **其他参数** (湿度、电压、液位等) → 相关性极低，实际帮助微小
+
+相关性分析：
+```
+N4_T  r=0.986  ← 绝对主导
+N4_R  r=0.315  ← NTC 电阻，与温度非线性相关
+AT    r=0.290  ← 环境温度，弱相关
+temp  r=0.125  ← 模块温度，很弱
+humi  r=0.080  ← 湿度，几乎无关
 ```
 
-### 2. 加载模型文件
+---
 
-```python
-import pickle
+## Kibana Scripted Field 设置
 
-with open("model.pkl", "rb") as f:
-    model = pickle.load(f)
+### 打开 Kibana → Management → Index Patterns → 选择 `logs-onenet-*`
 
-# model = {"degree": 3, "coeffs": [...], "mae": 0.888, ...}
+### 方案 1：简单版（推荐）
+
+点 **Scripted Fields** → **Add scripted field**：
+
+| 设置项 | 值 |
+|--------|-----|
+| Name | `N4_T0` |
+| Language | `painless` |
+| Type | `Number` |
+| Format | `0.0` |
+| Script | 见下方 |
+
+```painless
+def n4 = doc['data.params.N4_T.value'].value;
+return 20.418860 - 0.258503 * n4 + 0.02558798 * n4 * n4 - 0.0001671409 * n4 * n4 * n4;
 ```
 
-### 3. 重新训练
+### 方案 2：精度版
 
-```bash
-# 拉取最新数据
-python3 fetch_data.py
-
-# 训练
-python3 train_model.py
+```painless
+def n4 = doc['data.params.N4_T.value'].value;
+def at = doc['data.params.AT.value'].value;
+def tp = doc['data.params.temp.value'].value;
+def nr = doc['data.params.N4_R.value'].value;
+return 21.116037 + 0.195231 * n4 + 0.01590233 * n4 * n4 - 0.0001026491 * n4 * n4 * n4 + 0.374042 * at - 0.644548 * tp - 0.009541 * nr;
 ```
+
+### 对比查看
+
+在 Discover 中选择 `N4_T0` 和 `data.params.OT4_C.value` 两列，越接近说明模型效果越好。
+
+---
 
 ## 文件说明
 
 ```
 ntc_predict/
-├── README.md              # 本文件
-├── ntc_predict_model.py   # 预测函数（可直接 import 使用）
-├── model.pkl              # 训练好的模型（pickle 格式）
-├── raw_data.jsonl         # 原始训练数据（本地缓存）
-├── fetch_data.py          # 从 ES 拉取数据（本地运行）
-├── fetch_on_server.py     # 从 ES 拉取数据（服务器端运行）
-├── train_model.py         # sklearn 版训练脚本（需 numpy/sklearn）
-└── train_on_server.py     # 纯 Python 版训练脚本（无依赖）
+├── ntc_predict_model.py   ← 预测函数（可直接 import）
+├── train_on_server.py     ← 纯 Python 训练（无依赖）
+├── fetch_on_server.py     ← 从 ELK 拉取数据
+├── multivar_analysis.py   ← 多变量对比分析
+└── README.md              ← 本文档
 ```
