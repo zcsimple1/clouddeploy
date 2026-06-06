@@ -1,0 +1,10 @@
+# NTC 预测数据（体积大，不纳入版本控制）
+ntc_predict/raw_data.jsonl
+
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+ntc_predict/fetch.log
+ntc_predict/ntc_data.jsonl.gz
+ntc_predict/model.pkl
